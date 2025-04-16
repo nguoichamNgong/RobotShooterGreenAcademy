@@ -34,6 +34,7 @@ public class PlayerHealth : MonoBehaviour
 
     void PlayerGameOver()
     {
+
         weaponCamera.parent = null;
         deathVirtualCamera.Priority = gameOverVirtualCameraPriority;
         gameOverContainer.SetActive(true);
