@@ -10,6 +10,7 @@ public class ActiveWeapon : MonoBehaviour
     [SerializeField] Camera weaponCamera;
     [SerializeField] GameObject zoomVignette;
     [SerializeField] TMP_Text ammoText;
+    [SerializeField] AudioSource zoom;
 
     WeaponSO currentWeaponSO;
     Animator animator;
@@ -36,7 +37,7 @@ public class ActiveWeapon : MonoBehaviour
     private void Start()
     {
         SwitchWeapon(startingWeapon);
-        //currentWeapon = GetComponentInChildren<Weapon>();
+        currentAmmo = 0;
         AdjustAmmo(currentWeaponSO.magazineSize);
     }
 
@@ -49,10 +50,7 @@ public class ActiveWeapon : MonoBehaviour
     public void AdjustAmmo(int amount)
     {
         currentAmmo += amount;
-        if(currentAmmo > currentWeaponSO.magazineSize)
-        {
-            currentAmmo = currentWeaponSO.magazineSize;
-        }
+        currentAmmo = Mathf.Clamp(currentAmmo, 0, currentWeaponSO.magazineSize);
         ammoText.text = currentAmmo.ToString("D2");
     }
 
@@ -65,32 +63,46 @@ public class ActiveWeapon : MonoBehaviour
 
         Weapon newWeapon = Instantiate(weaponSO.weaoponPrefab, transform).GetComponent<Weapon>();
         currentWeapon = newWeapon;
+        currentWeapon.SetWeaponData(weaponSO); // Gửi dữ liệu vũ khí
         this.currentWeaponSO = weaponSO;
+        currentAmmo = 0;
         AdjustAmmo(currentWeaponSO.magazineSize);
     }
 
     void HandleShoot()
     {
+        if (currentWeapon == null || currentWeaponSO == null) return;
+
         timeSinceLastShot += Time.deltaTime;
-        if (!starterAssetsInputs.shoot) return;
-        if (timeSinceLastShot >= currentWeaponSO.FireRate && currentAmmo > 0)
+
+        // Xử lý bắn: tự động hoặc bán tự động
+        bool isTriggerPulled = currentWeaponSO.isAutomatic
+            ? Input.GetMouseButton(0)
+            : Input.GetMouseButtonDown(0);
+
+        if (isTriggerPulled && timeSinceLastShot >= currentWeaponSO.FireRate && currentAmmo > 0)
         {
             currentWeapon.Shoot(currentWeaponSO);
             animator.Play(SHOOT_STRING, 0, 0f);
             timeSinceLastShot = 0f;
             AdjustAmmo(-1);
         }
-        if (!currentWeaponSO.isAutomatic)
-        {
-            starterAssetsInputs.ShootInput(false);
-        }
+    }
+
+    public WeaponSO GetCurrentWeaponSO()
+    {
+        return currentWeaponSO;
     }
 
     void HandleZoom()
     {
-        if(!currentWeaponSO.CanZoom) return;
-        if (starterAssetsInputs.zoom)
+        if (!currentWeaponSO.CanZoom) return;
+
+        if (Input.GetMouseButton(1)) // Right click
         {
+            if (!zoom.isPlaying)
+                zoom.Play();
+
             playerFollowCamera.m_Lens.FieldOfView = currentWeaponSO.ZoomAmount;
             weaponCamera.fieldOfView = currentWeaponSO.ZoomAmount;
             zoomVignette.SetActive(true);

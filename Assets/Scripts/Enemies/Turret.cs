@@ -11,9 +11,12 @@ public class Turret : MonoBehaviour
     [SerializeField] int damage = 2;
 
     PlayerHealth player;
+    AudioManager audioManager;  // Reference to the AudioManager
+
     private void Start()
     {
-        player = FindFirstObjectByType<PlayerHealth>();
+        player = FindObjectOfType<PlayerHealth>();  // Find PlayerHealth in the scene
+        audioManager = FindObjectOfType<AudioManager>();  // Find AudioManager in the scene
         StartCoroutine(FireRoutine());
     }
 
@@ -27,10 +30,17 @@ public class Turret : MonoBehaviour
         while (player)
         {
             yield return new WaitForSeconds(fireRate);
-            Projectile newprojectTile = Instantiate(projectilePrefab, projectileSpawnPoint.position, turretHead.rotation).GetComponent<Projectile>();
-            newprojectTile.transform.LookAt(targetPoint);
-            newprojectTile.Init(damage);
-        }
 
+            // Instantiate the projectile
+            Projectile newProjectile = Instantiate(projectilePrefab, projectileSpawnPoint.position, turretHead.rotation).GetComponent<Projectile>();
+            newProjectile.transform.LookAt(targetPoint);
+            newProjectile.Init(damage);
+
+            // Play the firing sound using AudioManager
+            if (audioManager != null)
+            {
+                audioManager.PlaySFX(audioManager.gun);  // Play the "gun" firing sound
+            }
+        }
     }
 }

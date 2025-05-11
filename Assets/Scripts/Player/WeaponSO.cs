@@ -11,4 +11,6 @@ public class WeaponSO : ScriptableObject
     public float ZoomAmount = 10f;
     public float ZoomRotationSpeed = .3f;
     public int magazineSize = 12;
+    public AudioClip sound;
+    public bool isMachineGun;
 }

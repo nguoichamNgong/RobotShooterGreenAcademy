@@ -29,6 +29,9 @@ namespace StarterAssets
         public bool cursorLocked = true;
         public bool cursorInputForLook = true;
 
+        [Header("Audio")]
+        public AudioManager audioManager;
+
         void Start()
         {
             SetCursorState(true);
@@ -41,6 +44,7 @@ namespace StarterAssets
                 TogglePause();
             }
         }
+
         void TogglePause()
         {
             isPaused = !isPaused;
@@ -49,6 +53,7 @@ namespace StarterAssets
             inputEnabled = !isPaused;
             SetCursorState(!isPaused);
         }
+
         public void ResumeGame()
         {
             isPaused = false;
@@ -57,10 +62,11 @@ namespace StarterAssets
             inputEnabled = true;
             SetCursorState(true);
         }
+
         public void ReturnToMenu()
         {
-            Time.timeScale = 1; 
-            SceneManager.LoadScene("Ui Manager"); 
+            Time.timeScale = 1;
+            SceneManager.LoadScene("Ui Manager");
         }
 
 #if ENABLE_INPUT_SYSTEM
@@ -80,6 +86,12 @@ namespace StarterAssets
         {
             if (!inputEnabled) return;
             JumpInput(value.isPressed);
+
+            // Phát âm thanh khi nh?y
+            if (value.isPressed && audioManager != null && audioManager.Jump != null)
+            {
+                audioManager.PlaySFX(audioManager.Jump);
+            }
         }
 
         public void OnSprint(InputValue value)
@@ -100,7 +112,6 @@ namespace StarterAssets
             ZoomInput(value.isPressed);
         }
 #endif
-
 
         public void MoveInput(Vector2 newMoveDirection)
         {
@@ -142,5 +153,4 @@ namespace StarterAssets
             Cursor.lockState = newState ? CursorLockMode.Locked : CursorLockMode.None;
         }
     }
-
 }

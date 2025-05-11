@@ -21,3 +21,5 @@ MonoBehaviour:
   ZoomAmount: 10
   ZoomRotationSpeed: 0.3
   magazineSize: 50
+  sound: {fileID: 8300000, guid: 22a86e0f0a02f2643b415c4dded54334, type: 3}
+  isMachineGun: 1
